@@ -9,7 +9,14 @@ class RTesseract
     end
   end
 
-  class ConversionError < ErrorWithMemory; end
+  class ConversionError < ErrorWithMemory
+    attr_accessor :command
+
+    def initialize(stored_error, command=nil)
+      super stored_error
+      @command = command
+    end
+  end
   class ImageNotSelectedError < ErrorWithMemory; end
   class TempFilesNotRemovedError < ErrorWithMemory; end
   

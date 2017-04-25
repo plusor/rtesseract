@@ -145,7 +145,11 @@ class RTesseract
 
   # Run command
   def convert_command
-    `#{configuration.command} "#{image}" "#{file_dest}" #{lang} #{psm} #{tessdata_dir} #{user_words} #{user_patterns} #{config_file} #{clear_console_output} #{options_cmd.join(' ')}`
+    `#{command}`
+  end
+
+  def command
+    @command = %(#{configuration.command} "#{image}" "#{file_dest}" #{lang} #{psm} #{tessdata_dir} #{user_words} #{user_patterns} #{config_file} #{clear_console_output} #{options_cmd.join(' ')})
   end
 
   # Is pdf output?
@@ -179,11 +183,13 @@ class RTesseract
 
   # Convert image to string
   def convert
-    convert_command
+    @result = convert_command
     after_convert_hook
     convert_result
   rescue => error
-    raise RTesseract::ConversionError.new(error), error, caller
+    puts "~# \e[31m#{command}\033[0m\n"
+    puts @result.inspect
+    raise RTesseract::ConversionError.new(error, command), error, caller
   end
 
   # Output value
