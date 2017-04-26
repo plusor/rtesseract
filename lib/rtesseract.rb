@@ -21,6 +21,18 @@ class RTesseract
     initialize_hook
   end
 
+  def self.logger
+    @logger ||= if Module.const_defined?("::Rails")
+      Logger.new(File.join(::Rails.root, 'log/rtesseract.log'))
+    else
+      $stdout
+    end
+  end
+
+  def logger
+    self.class.logger
+  end
+
   # Hook to end of initialize method
   def initialize_hook
   end
@@ -187,8 +199,7 @@ class RTesseract
     after_convert_hook
     convert_result
   rescue => error
-    puts "~# \e[31m#{command}\033[0m\n"
-    puts @result.inspect
+    logger.info "\n~# \e[31m#{command}\033[0m\n=> #{@result.inspect}\n"
     raise RTesseract::ConversionError.new(error, command), error, caller
   end
 
