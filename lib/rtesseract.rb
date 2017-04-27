@@ -22,10 +22,12 @@ class RTesseract
   end
 
   def self.logger
-    @logger ||= if Module.const_defined?("::Rails")
-      Logger.new(File.join(::Rails.root, 'log/rtesseract.log'))
-    else
-      $stdout
+    @logger ||= Logger.new(logfile || $stdout)
+  end
+
+  def self.logfile
+    if Module.const_defined?("::Rails")
+      File.join(::Rails.root, 'log/rtesseract.log')
     end
   end
 
@@ -33,8 +35,13 @@ class RTesseract
     self.class.logger
   end
 
+  def logfile
+    self.class.logfile
+  end
+
   # Hook to end of initialize method
   def initialize_hook
+    $stderr.reopen logger.instance_variable_get(:@logdev).dev
   end
 
   # Define the source
@@ -125,7 +132,7 @@ class RTesseract
 
   # TODO: Clear console for MacOS or Windows
   def clear_console_output
-    return '' if configuration.debug
+    return "#{logfile ? '2>>'+logfile : ''}" if configuration.debug
     return '2>/dev/null' if File.exist?('/dev/null') # Linux console clear
   end
 
@@ -199,8 +206,8 @@ class RTesseract
     after_convert_hook
     convert_result
   rescue => error
-    logger.info "\n~# \e[31m#{command}\033[0m\n=> #{@result.inspect}\n"
-    raise RTesseract::ConversionError.new(error, command), error, caller
+    logger.info "\n~# \e[31m#{@command}\033[0m\n=> #{@result.inspect}\n"
+    raise RTesseract::ConversionError.new(error, @command), error, caller
   end
 
   # Output value
