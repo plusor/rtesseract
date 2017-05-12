@@ -68,6 +68,7 @@ class RTesseract
       config.processor = config.option(options, :processor, 'rmagick')
       config.load_options(options, [:lang, :psm, :tessdata_dir, :user_words, :user_patterns])
       config.debug = config.option(options, :debug, false)
+      config.tessdata_dir = config.option(options, :tessdata_dir, ENV["TESSDATA_PREFIX"])
       pdf_opts = lambda { |o| o == 'pdf' || o == :pdf }
       config.options_cmd = [options.option(:options, nil)].delete_if(&pdf_opts).flatten.compact
     end
